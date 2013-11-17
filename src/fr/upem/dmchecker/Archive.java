@@ -15,7 +15,7 @@ public class Archive {
 		try {
 			// destination folder to extract the contents
 			String destinationname = "C:\\Users\\Nanjou\\Documents\\GitHub\\DMChecker\\";
-
+			
 			byte[] buf = new byte[1024];
 			ZipInputStream zipinputstream = null;
 			ZipEntry zipentry;
@@ -108,11 +108,12 @@ public class Archive {
 		System.out.println("Hello world, bonjour monde.");
 
 		String destinationname = "C:\\Users\\Nanjou\\Documents\\GitHub\\DMChecker\\";
-		// extractZipFiles("IR2_Java_Avancé_TP5[LATKOVIC].zip");
-		// System.out.println("DONE.\n");
-		getZipFiles("CRE_REMI_DESIGN_PATTERN_TD1.rar", destinationname);
+		
+		extractZipFiles("IR2_Java_Avancé_TP5[LATKOVIC].zip");
 		System.out.println("DONE.\n");
-		getZipFiles("TD03.tar.gz", destinationname);
+		extractZipFiles("CRE_REMI_DESIGN_PATTERN_TD1.rar");
+		System.out.println("DONE.\n");
+		extractZipFiles("TD03.tar.gz");
 		System.out.println("DONE.\n");
 	}
 }
