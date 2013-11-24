@@ -157,7 +157,8 @@ public class Options extends JSAP {
 			}
 			//MyColor.DESTINATION.setValue(option[1]);
 		}
-		else if(!destinationIsAlreadyKnown &&(option=config.getStringArray(MyColor.DESTINATION.longFlag))!=null){
+		if(!destinationIsAlreadyKnown &&(option=config.getStringArray(MyColor.DESTINATION.longFlag))!=null){
+			//System.out.println("DESTINATION ---> "+option);
 			MyColor.DESTINATION.setValue(option);
 		}
 		else{
