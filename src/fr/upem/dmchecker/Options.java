@@ -1,5 +1,6 @@
 package fr.upem.dmchecker;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -14,26 +15,9 @@ import com.martiansoftware.jsap.UnflaggedOption;
 
 public class Options extends JSAP {
 
-	static final int nbEnum=12;
-	static final int nbBoolean=5;
-	
-	static class Option{
-		String name;
-		char flag;
 
-		public Option(String name, char flag) {
-			this.name = name;
-			this.flag = flag;
-		}	
-	}
 
-	/*
-	 * Mettre la hashmap des options dans le enum
-	 * 
-	 */
 	public	enum	MyColor {
-
-
 
 		//NUMBER_OF_COMMAND(),
 		OPTION_ONE("optionOne",'1'),
@@ -53,12 +37,11 @@ public class Options extends JSAP {
 		BEGIN_WITH("beginWith",'b'),
 		FORCE_BEGIN_WITH("forceBeginWith",'B');
 
-
-		//static final HashMap<String,MyColor> map;
-
-		String longFlag; //longflag
+		String longFlag; 
 		char shortFlag;
-		String  value;
+		String  value[];
+		static final int nbEnum=16;
+		static final int nbBoolean=5;
 
 		MyColor(){
 
@@ -74,195 +57,66 @@ public class Options extends JSAP {
 		public char getFlag(){
 			return shortFlag;
 		}
-		public String getValue(){
+		public String[] getValue(){
 
 			return value;			
 		}
-		public void setValue(String value){
+		public void setValue(String value[]){
 			this.value=value;
 		}
-		static
-		{
-			/*DESTINATION.longFlag="destination";
-			DESTINATION.shortFlag='d';
-			VERBOSE.longFlag="verbose";
-			VERBOSE.shortFlag='v';
-			ONE_TOP.longFlag="oneTop";
-			ONE_TOP.shortFlag='o';
-			FORCE_ONE_TOP.longFlag="forceOneTop";
-			FORCE_ONE_TOP.shortFlag='O';
-			ENDS_WITH.longFlag="endsWith";
-			ENDS_WITH.shortFlag='e';
-			FORCE_ENDS_WITH.longFlag="forceEndsWith";
-			FORCE_ENDS_WITH.shortFlag='E';
-			EXIST.longFlag="exist";
-			EXIST.shortFlag='x';
-			FORCE_EXIST.longFlag="forceExist";
-			FORCE_EXIST.shortFlag='X';
-			FORBIDS.longFlag="forbids";
-			FORBIDS.shortFlag='i';
-			FORCE_FORBIDS.longFlag="forceForbids";
-			FORCE_FORBIDS.shortFlag='I';
-			BEGIN_WITH.longFlag="beginWith";
-			BEGIN_WITH.shortFlag='b';
-			FORCE_BEGIN_WITH.longFlag="forceBeginWith";
-			FORCE_BEGIN_WITH.shortFlag='B';
-			 */
-
-
-
-			//DESTINATION = new MyColor();
-			/*HashMap<String,Color> map =
-					new HashMap<String,Color>();
-			for(MyColor m:values()) {
-				map.put(m.getName(),m);
-			}
-			MyColor.map = map;*/
+		public void setValue(String string) {
+			String value[]=new String[1];
+			value[0]=string;
+			this.value=value;			
 		}
 	}
 
-	public EnumSet<MyColor> getOption(String args[]) throws JSAPException{
+	public static EnumSet<MyColor> getOption(String args[]) throws JSAPException{
 		JSAP jsap = new JSAP();
-		//MyColor options = new MyColor();
-		//HashMap<String,LinkedList<String>> options = new HashMap<>();
-
-		//LinkedList<Option> optionsList = new LinkedList<>();
-
 		EnumSet<MyColor> usedOption = EnumSet.noneOf(MyColor.class) ;
 
 
-		/*final Option DESTINATION = new Option("destination",'d');
-		final Option VERBOSE = new Option("verbose",'v');
-		final Option ONE_TOP = new Option("oneTop",'o');
-		final Option FORCE_ONE_TOP = new Option("forceOneTop",'O');
-		final Option ENDS_WITH = new Option("endsWith",'e');
-		final Option FORCE_ENDS_WITH = new Option("forceEndsWith",'E');
-		final Option EXIST = new Option("exist",'x');
-		final Option FORCE_EXIST = new Option("forceExist",'X');
-		final Option FORBIDS = new Option("forbids",'i');
-		final Option FORCE_FORBIDS = new Option("forceForbids",'I');
-		final Option BEGIN_WITH = new Option("beginWith",'b');
-		final Option FORCE_BEGIN_WITH = new Option("forceBeginWith",'B');*/
-
-		/*	optionsList.add(DESTINATION);
-		optionsList.add(VERBOSE);
-		optionsList.add(ONE_TOP);
-		optionsList.add(FORCE_ONE_TOP);
-		optionsList.add(ENDS_WITH);
-		optionsList.add(FORCE_ENDS_WITH);
-		optionsList.add(EXIST);
-		optionsList.add(FORCE_EXIST);
-		optionsList.add(FORBIDS);
-		optionsList.add(FORCE_FORBIDS);
-		optionsList.add(BEGIN_WITH);
-		optionsList.add(FORCE_BEGIN_WITH);
-		 */
-
-		/*
-		 * Number of the command Option
-		 */
-		/*
-		 * FlaggedOption flaggedOption = new FlaggedOption(option.getName())
-		.setStringParser(JSAP.STRING_PARSER)
-		.setRequired(false).setShortFlag(option.getFlag()) 
-		.setLongFlag(option.getName());
-		return flaggedOption;
-		 */
-
+		// The select options (-1,-2,-3,-4)
 		for(MyColor opt : MyColor.values()){
-			//opt.
 			if(opt.ordinal()<4){
 				jsap.registerParameter(new Switch(opt.getName()).setShortFlag(opt.getFlag()));
 			}
-			/*jsap.registerParameter(new Switch("optionTwo").setShortFlag('2'));
-		jsap.registerParameter(new Switch("optionThree").setShortFlag('3'));
-		jsap.registerParameter(new Switch("optionFour").setShortFlag('4'));*/
 		}
 
 		//Destination
 		FlaggedOption destinationOption = new FlaggedOption(MyColor.DESTINATION.longFlag)
-		.setStringParser(JSAP.STRING_PARSER).setDefault("./") 
+		.setStringParser(JSAP.STRING_PARSER).setDefault(".") 
 		.setRequired(false).setShortFlag(MyColor.DESTINATION.shortFlag) 
 		.setLongFlag(MyColor.DESTINATION.longFlag);
+		jsap.registerParameter(destinationOption);
 
 		//Verbose
 		Switch verboseSwitch = new Switch(MyColor.VERBOSE.longFlag)
 		.setShortFlag(MyColor.VERBOSE.shortFlag).setLongFlag(MyColor.VERBOSE.longFlag);
+		jsap.registerParameter(verboseSwitch);
 
-
-		UnflaggedOption unflaggedOption = new UnflaggedOption("name")
+		UnflaggedOption unflaggedOption = new UnflaggedOption("unflaggedOption")
 		.setStringParser(JSAP.STRING_PARSER)
 		.setRequired(true)
 		.setGreedy(true); // Recover all unflagged option
-
+		jsap.registerParameter(unflaggedOption);
 
 
 		// For the others options
 		for(MyColor opt : MyColor.values()){
-			if(opt.ordinal()>=nbBoolean+1){	// +1 for destinationOption which is registered after
+			if(opt.ordinal()>=MyColor.nbBoolean+1){	// +1 for destinationOption which is registered after
 
-				System.out.println("->"+opt);
+				//	System.out.println("->"+opt);
 				jsap.registerParameter( getFlaggedOption(opt));
 			}
 		}
-		jsap.registerParameter(destinationOption);
-		jsap.registerParameter(verboseSwitch);
-		jsap.registerParameter(unflaggedOption);
-		/*for(Option opt : optionsList){
-			FlaggedOption oneTopOption = getFlaggedOption(opt);
 
-		}*/
-
-		//FlaggedOption[] flaggedOptions = new FlaggedOption[optionsList.size()];
-
-
-		/*
-		//Destination
-		FlaggedOption destinationOption = new FlaggedOption(DESTINATION.name)
-		.setStringParser(JSAP.STRING_PARSER).setDefault("./") 
-		.setRequired(false).setShortFlag(DESTINATION.flag) 
-		.setLongFlag(DESTINATION.name);
-
-		//Verbose
-		Switch verboseSwitch = new Switch(VERBOSE.name)
-		.setShortFlag(VERBOSE.flag).setLongFlag(VERBOSE.name);
-
-		FlaggedOption oneTopOption = getFlaggedOption(ONE_TOP);
-		FlaggedOption forceOneTopOption = getFlaggedOption(FORCE_ONE_TOP);
-
-
-		FlaggedOption endsWithOption = getFlaggedOption(ENDS_WITH);
-		FlaggedOption forceEndsWithOption = getFlaggedOption(FORCE_ENDS_WITH);
-
-		FlaggedOption existOption = getFlaggedOption(EXIST);
-		FlaggedOption forceExistOption = getFlaggedOption(FORCE_EXIST);
-
-		FlaggedOption forbidsOption = getFlaggedOption(FORBIDS);
-		//Force-Forbids 
-		FlaggedOption forceForbidsOption = getFlaggedOption(FORCE_FORBIDS);
-
-		FlaggedOption beginsWithOption = getFlaggedOption(BEGIN_WITH);
-		FlaggedOption forceBeginsWithOption = getFlaggedOption(FORCE_BEGIN_WITH);
-		 */
-		//System.out.println(opt.length);
-
-		/*jsap.registerParameter(destinationOption);
-		jsap.registerParameter(verboseSwitch);
-		jsap.registerParameter(oneTopOption);
-		jsap.registerParameter(forceOneTopOption);
-		jsap.registerParameter(endsWithOption);
-		jsap.registerParameter(forceEndsWithOption);
-		jsap.registerParameter(existOption);
-		jsap.registerParameter(forceExistOption);
-		jsap.registerParameter(forbidsOption);
-		jsap.registerParameter(forceForbidsOption);
-		jsap.registerParameter(beginsWithOption);
-		jsap.registerParameter(forceBeginsWithOption);
-		 */
+		System.out.println("BEFORE PARSE "+Arrays.toString(args));
+		// Parse all the arguments
 		JSAPResult config = jsap.parse(args);    
 
 
-		// If parsing is unsuccessful
+		// If parsing is unsuccessful, print the usage
 		if (!config.success()) {
 			System.err.println();
 			System.err.println("Usage: java ");
@@ -271,100 +125,64 @@ public class Options extends JSAP {
 			System.err.println();
 			System.exit(1);
 		}
-		/*
-		 * jsap.registerParameter(oneTopOption);
-		jsap.registerParameter(forceOneTopOption);
-		jsap.registerParameter(endsWithOption);
-		jsap.registerParameter(forceEndsWithOption);
-		jsap.registerParameter(existOption);
-		jsap.registerParameter(forceExistOption);
-		jsap.registerParameter(forbidsOption);
-		jsap.registerParameter(forceForbidsOption);
-		jsap.registerParameter(beginsWithOption);
-		jsap.registerParameter(forceBeginsWithOption);
+		String[] option;
 
-		 */
-		String option;
-		/*
-		 * Gaffe au cas de destination et de verbose
-		 */
 		//penser aux tableaux de string
 		for(MyColor opt : MyColor.values()){
-			
-			if(opt.ordinal()<nbBoolean && config.getBoolean(opt.longFlag)){ 
+
+			if(opt.ordinal()<MyColor.nbBoolean && config.getBoolean(opt.longFlag)){ 
 				usedOption.add(opt);
 			}
-			else if(opt.ordinal()>=nbBoolean && (option=config.getString(opt.longFlag))!=null){ 
+			else if(opt.ordinal()>MyColor.nbBoolean && (option=config.getStringArray(opt.longFlag)).length>0){ 
+				//System.out.println("DEBUG : "+opt.getName()+" "+Arrays.toString(option));
 				opt.setValue(option);
 				usedOption.add(opt);
 			}
 		}
-		
 
 
-
-		/*	if((option=config.getString("optionOne"))!=null){
-			MyColor.NUMBER_OF_COMMAND.setValue("1");
+		// DESTINATION
+		// The priority is for the second argument, and after the option -d
+		boolean destinationIsAlreadyKnown=false;
+		if((option=config.getStringArray("unflaggedOption")) != null ){
+			switch(option.length){
+			case 1 : MyColor.OPTION_ONE.setValue(option); break;
+			case 2 : MyColor.OPTION_TWO.setValue(option);
+					MyColor.DESTINATION.setValue(option[1]); 
+					destinationIsAlreadyKnown=true;			break;
+			case 3 : MyColor.OPTION_THREE.setValue(option); break;
+			case 4 : MyColor.OPTION_FOUR.setValue(option); break;
+			default : // #TODO  erreur 
+				break;
+			}
+			//MyColor.DESTINATION.setValue(option[1]);
 		}
-		else if((option=config.getString("optionTwo"))!=null){
-			MyColor.NUMBER_OF_COMMAND.setValue("2");
-		}
-		else if((option=config.getString("optionThree"))!=null){
-			MyColor.NUMBER_OF_COMMAND.setValue("3");
-		}
-		else if((option=config.getString("optionFour"))!=null){
-			MyColor.NUMBER_OF_COMMAND.setValue("4");
+		if(!destinationIsAlreadyKnown &&(option=config.getStringArray(MyColor.DESTINATION.longFlag))!=null){
+			//System.out.println("DESTINATION ---> "+option);
+			MyColor.DESTINATION.setValue(option);
 		}
 		else{
-			//ERREUR
+			// Error, pas de destination
+			// #TODO  erreur 
+			// Apel to DMMESSAGE
+			System.exit(0);
+		}		
+		//	MyColor.DESTINATION.setValue(option[1]);
+		usedOption.add(MyColor.DESTINATION);
+
+
+		// Test if there is only one selected option
+		int nbSelectOption = 0;
+		for(MyColor opt : MyColor.values()){
+			if(opt.ordinal()<4 && usedOption.contains(opt)){
+				nbSelectOption++;				
+			}
 		}
-		usedOption.add(MyColor.NUMBER_OF_COMMAND);*/
-
-
-
-
-
-		/*String option;
-
-		if((option=config.getString(DESTINATION.name))!=null){ // The default value is ./
-
+		if(nbSelectOption != 1){
+			// #TODO  erreur 
+			// Erreur, option invalide
 		}
-		if((option=config.getString(VERBOSE.name))!=null){ 
 
-		}
-		if((option=config.getString(ONE_TOP.name))!=null){ 
-
-		}
-		if((option=config.getString(FORCE_ONE_TOP.name))!=null){ 
-
-		}
-		if((option=config.getString(ENDS_WITH.name))!=null){ 
-
-		}
-		if((option=config.getString(FORCE_ENDS_WITH.name))!=null){ 
-
-		}
-		if((option=config.getString(EXIST.name))!=null){ 
-
-		}
-		if((option=config.getString(FORCE_EXIST.name))!=null){ 
-
-		}
-		if((option=config.getString(EXIST.name))!=null){ 
-
-		}
-		if((option=config.getString(EXIST.name))!=null){ 
-
-		}
-		if((option=config.getString(EXIST.name))!=null){ 
-
-		}
-		if((option=config.getString(EXIST.name))!=null){ 
-
-		}
-		 */
-
-		// Traité les deux derniers args et le -1 ou -2 ...
 
 		System.out.println(config.getString("destination"));
 		System.out.println("Sont interdit les fichiers finissant par: "+config.getString("exist"));
@@ -376,13 +194,15 @@ public class Options extends JSAP {
 		return usedOption;
 	}
 
-	private FlaggedOption getFlaggedOption(final MyColor option) {
+	private static FlaggedOption getFlaggedOption(final MyColor option) {
 		FlaggedOption flaggedOption = new FlaggedOption(option.getName())
 		.setStringParser(JSAP.STRING_PARSER)
 		.setRequired(false).setShortFlag(option.getFlag()) 
 		.setLongFlag(option.getName());
 		return flaggedOption;
 	}
+
+
 
 	//@SuppressWarnings("static-access")
 	public static void main(String[] args) throws JSAPException {
@@ -399,6 +219,8 @@ public class Options extends JSAP {
 		for(MyColor my : mc){
 			System.out.println("ENUM : "+my+" : "+my.getValue());
 		}
+
+
 		//System.out.println("Destination :"+(mc..getValue());
 	}
 
