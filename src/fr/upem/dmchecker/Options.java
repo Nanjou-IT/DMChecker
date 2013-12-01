@@ -13,6 +13,14 @@ import com.martiansoftware.jsap.JSAPResult;
 import com.martiansoftware.jsap.Switch;
 import com.martiansoftware.jsap.UnflaggedOption;
 
+/*
+ * a faire : 
+ * planter si 2 one top
+ * tester si ca marche avec 2 fois la meme option
+ * 
+ */
+
+
 public class Options extends JSAP {
 
 
@@ -157,16 +165,21 @@ public class Options extends JSAP {
 			}
 			//MyColor.DESTINATION.setValue(option[1]);
 		}
-		if(!destinationIsAlreadyKnown &&(option=config.getStringArray(MyColor.DESTINATION.longFlag))!=null){
-			//System.out.println("DESTINATION ---> "+option);
-			MyColor.DESTINATION.setValue(option);
+		System.out.println("test");
+		if(!destinationIsAlreadyKnown){
+			if((option=config.getStringArray(MyColor.DESTINATION.longFlag))!=null){
+				//System.out.println("DESTINATION ---> "+option);
+				MyColor.DESTINATION.setValue(option);
+			}
+			else{
+				// Error, pas de destination
+				// #TODO  erreur 
+				// Apel to DMMESSAGE
+				System.out.println("EXIT pas destination");
+				System.exit(0);
+			}		
 		}
-		else{
-			// Error, pas de destination
-			// #TODO  erreur 
-			// Apel to DMMESSAGE
-			System.exit(0);
-		}		
+		
 		//	MyColor.DESTINATION.setValue(option[1]);
 		usedOption.add(MyColor.DESTINATION);
 
