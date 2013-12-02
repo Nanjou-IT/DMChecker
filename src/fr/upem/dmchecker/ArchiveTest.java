@@ -1,14 +1,22 @@
 package fr.upem.dmchecker;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Enumeration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 public class ArchiveTest {
@@ -30,70 +38,229 @@ public class ArchiveTest {
 		tmpDir = null;
 	}
 
-	@Test(expected = NullPointerException.class )
-	public void testArchiveLoggerTest() throws IOException {
-		new Archive(null);
-	}
-
-	@Test
-	public void testExtractArchiveTARGZ() throws IOException {
-		Archive archive = new Archive(log);
-		String destinationname = "C:\\Users\\Nanjou\\Documents\\GitHub\\DMChecker\\TestingFiles\\";
-		String filename = "TestingFiles\\RawTarGzArchive.tar.gz";
-		assertFalse(archive.extractZipFile(filename, destinationname));
-	}
-
-	@Test
-	public void testExtractArchiveZip() throws IOException {
-		Archive archive = new Archive(log);
-		String destinationname = "C:\\Users\\Nanjou\\Documents\\GitHub\\DMChecker\\TestingFiles\\";
-		String filename = "TestingFiles\\RawZipArchive.zip";
-		assertTrue(archive.extractZipFile(filename, destinationname));
-	}
+//	@Test
+//	public void testValidateArchiveZipNotOneTop() throws IOException {
+//		Archive archive = new Archive(log);
+//		String filename = "TestingFiles\\archiveOfArchive.zip";
+//		System.out.println("\n");
+//		assertEquals(1, archive.extractZipFile(filename));
+//	}
 	
 	@Test
-	public void testExtractArchiveZipIntoNull() throws IOException {
+	public void testValidateArchiveZipPlusieursAuTop() throws IOException {
 		Archive archive = new Archive(log);
-		String destinationname = "C:\\Users\\Nanjou\\Documents\\GitHub\\DMChecker\\TestingFiles\\";
-		String filename = "TestingFiles\\RawZipArchive.zip";
-		assertFalse(archive.extractZipFile(filename, null));
+		String filename = "TestingFiles\\plusieursautop.zip";
+		System.out.println("\n");
+		assertEquals(1, archive.validateArchive(filename));
 	}
+//	
+//	
+//	@Test
+//	public void testValidateArchiveZipPlusieursDirAuTop() throws IOException {
+//		Archive archive = new Archive(log);
+//		String filename = "TestingFiles\\plusieursDirAuTop.zip";
+//		System.out.println("\n");
+//		assertTrue(archive.validateArchive(filename));
+//	}
+//	
+//	@Test
+//	public void testValidateArchiveZipOneTop() throws IOException {
+//		Archive archive = new Archive(log);
+//		String filename = "TestingFiles\\testZipOrder1.zip";
+//		System.out.println("\n");
+//		assertTrue(archive.validateArchive(filename));
+//	}
 	
-	@Test
-	public void testExtractArchiveZipRar() throws IOException {
-		Archive archive = new Archive(log);
-		String destinationname = "C:\\Users\\Nanjou\\Documents\\GitHub\\DMChecker\\TestingFiles\\";
-		// This archive is a zip that was renamed rar
-		String filename = "TestingFiles\\FakeRarArchive.rar";
-		assertTrue(archive.extractZipFile(filename, destinationname));
-	}
+//	
+//	@Test
+//	public void testValidateArchiveZip() throws IOException {
+//		Archive archive = new Archive(log);
+//		String filename = "TestingFiles\\RawZipArchive.zip";
+//		assertFalse(archive.validateArchive(filename));
+//	}
 	
-	@Test
-	public void testExtractArchiveRar() throws IOException {
-		Archive archive = new Archive(log);
-		String destinationname = "C:\\Users\\Nanjou\\Documents\\GitHub\\DMChecker\\TestingFiles\\";
-		String filename = "TestingFiles\\RawRarArchive.rar";
-		assertFalse(archive.extractZipFile(filename, destinationname)); 
-	}
 	
-	@Test
-	public void testExtractWhatever() throws IOException {
-		Archive archive = new Archive(log);
-		String destinationname = "C:\\Users\\Nanjou\\Documents\\GitHub\\DMChecker\\TestingFiles\\";
-		String filename = "TestingFiles\\dd2.pdf";
-		assertFalse(archive.extractZipFile(filename, destinationname)); 
-	}
+//	@Test
+//	public void testZipOrder() throws Exception {
+//	    File file = new File("TestingFiles\\testZipOrder1.zip");
+//	    ZipInputStream zis = new ZipInputStream(new FileInputStream(file));
+//	    ZipEntry entry = null;
+//	    System.out.println("\ntestZipOrder:");
+//	    int i = 0;
+//	    while ((entry = zis.getNextEntry()) != null) {
+//	    	System.out.println(i + " == " + entry.getName());
+////	    	assertEquals(i+"", entry.getName());
+//	    }
+//	    zis.close();
+//	}
+//	
+//	@Test
+//	public void testZipOrder1() throws Exception {
+//	    File file = new File("TestingFiles\\testZipOrder2.zip");
+//	    ZipInputStream zis = new ZipInputStream(new FileInputStream(file));
+//	    ZipEntry entry = null;
+//	    System.out.println("\ntestZipOrder2:");
+//	    int i = 0;
+//	    while ((entry = zis.getNextEntry()) != null) {
+//	    	System.out.println(i + " == " + entry.getName());
+////	    	assertEquals(i+"", entry.getName());
+//	    }
+//	    zis.close();
+//	}
+//	
+//	@Test
+//	public void testZipOrder2() throws Exception {
+//	    File file = new File("TestingFiles\\testZipOrder3.zip");
+//	    ZipInputStream zis = new ZipInputStream(new FileInputStream(file));
+//	    ZipEntry entry = null;
+//	    System.out.println("\ntestZipOrder3:");
+//	    int i = 0;
+//	    while ((entry = zis.getNextEntry()) != null) {
+//	    	System.out.println(i + " == " + entry.getName());
+////	    	assertEquals(i+"", entry.getName());
+//	    }
+//	    zis.close();
+//	}
+//	
+//	@Test
+//	public void testZipOrder3() throws Exception {
+//	    File file = new File("TestingFiles\\testZipOrder4.zip");
+//	    ZipInputStream zis = new ZipInputStream(new FileInputStream(file));
+//	    ZipEntry entry = null;
+//	    System.out.println("\ntestZipOrder4:");
+//	    int i = 0;
+//	    while ((entry = zis.getNextEntry()) != null) {
+//	    	System.out.println(i + " == " + entry.getName());
+////	    	assertEquals(i+"", entry.getName());
+//	    }
+//	    zis.close();
+//	}
+//	
+//	@Test
+//	public void testZipOrder5() throws Exception {
+//	    File file = new File("TestingFiles\\plusieursDirAuTop.zip");
+//	    ZipInputStream zis = new ZipInputStream(new FileInputStream(file));
+//	    ZipEntry entry = null;
+//	    System.out.println("\ntestZipOrder5:");
+//	    int i = 0;
+//	    while ((entry = zis.getNextEntry()) != null) {
+//	    	System.out.println(i + " == " + entry.getName());
+////	    	assertEquals(i+"", entry.getName());
+//	    }
+//	    zis.close();
+//	}
 	
-	// How to make a test with a real corrupted zip :
-	// 	 - Testing with incomplete files - that's the way most corrupt files are created, by interrupted downloads.
-	//   - Another suggestion is to open the file and insert/delete random bytes.
-	@Test
-	public void testExtractArchiveZipCorrupted() throws IOException {
-		Archive archive = new Archive(log);
-		String destinationname = "C:\\Users\\Nanjou\\Documents\\GitHub\\DMChecker\\TestingFiles\\";
-		String filename = "TestingFiles\\RawCorruptZipArchive.zip";
-		assertFalse(archive.extractZipFile(filename, destinationname));
-	}
+//	@Test
+//	public void testZipOrder2() throws Exception {
+//	    File file = new File("TestingFiles\\testZipOrder4.zip");
+//	    System.out.println("\n\n"); 
+//	    
+//	    ZipFile zip = new ZipFile(file, Charset.forName("Cp437"));
+//	    Enumeration<? extends ZipEntry> zipFileEntries = zip.entries();
+//	    
+//	    int i = 0;
+//	    while (zipFileEntries.hasMoreElements()) {
+//	    	ZipEntry entry = (ZipEntry) zipFileEntries.nextElement();
+//			System.out.println(i + " == " + entry.getName());
+//	    }
+//	    System.out.println("\n\n");
+//	}
+	
+	
+	
+	
+	
+		
+//	@Test(expected = NullPointerException.class )
+//	public void testArchiveLoggerTest() throws IOException {
+//		new Archive(null);
+//	}
+//
+//	@Test
+//	public void testExtractArchiveTARGZ() throws IOException {
+//		Archive archive = new Archive(log);
+//		String destinationname = "C:\\Users\\Nanjou\\Documents\\GitHub\\DMChecker\\TestingFiles\\";
+//		String filename = "TestingFiles\\RawTarGzArchive.tar.gz";
+//		assertFalse(archive.extractZipFile(filename, destinationname));
+//	}
+//
+//	@Test
+//	public void testExtractArchiveZip() throws IOException {
+//		Archive archive = new Archive(log);
+//		String destinationname = "C:\\Users\\Nanjou\\Documents\\GitHub\\DMChecker\\TestingFiles\\";
+//		String filename = "TestingFiles\\RawZipArchive.zip";
+//		assertTrue(archive.extractZipFile(filename, destinationname));
+//	}
+//	
+//	@Test
+//	public void testExtractArchiveZipNotOneTop() throws IOException {
+//		Archive archive = new Archive(log);
+//		String destinationname = "C:\\Users\\Nanjou\\Documents\\GitHub\\DMChecker\\TestingFiles\\";
+//		String filename = "TestingFiles\\plusieursautop.zip";
+//		System.out.println("\n");
+//		assertTrue(archive.extractZipFile(filename, destinationname));
+//	}
+//	
+//	@Test
+//	public void testExtractArchiveZipPlusieursAuTop() throws IOException {
+//		Archive archive = new Archive(log);
+//		String destinationname = "C:\\Users\\Nanjou\\Documents\\GitHub\\DMChecker\\TestingFiles\\";
+//		String filename = "TestingFiles\\notop.zip";
+//		System.out.println("\n");
+//		assertTrue(archive.extractZipFile(filename, destinationname));
+//	}
+//	
+//	@Test
+//	public void testExtractArchiveZipIntoNull() throws IOException {
+//		Archive archive = new Archive(log);
+//		String destinationname = "C:\\Users\\Nanjou\\Documents\\GitHub\\DMChecker\\TestingFiles\\";
+//		String filename = "TestingFiles\\RawZipArchive.zip";
+//		assertFalse(archive.extractZipFile(filename, null));
+//	}
+//	
+//	@Test
+//	public void testExtractArchiveZipRar() throws IOException {
+//		Archive archive = new Archive(log);
+//		String destinationname = "C:\\Users\\Nanjou\\Documents\\GitHub\\DMChecker\\TestingFiles\\";
+//		// This archive is a zip that was renamed rar
+//		String filename = "TestingFiles\\FakeRarArchive.rar";
+//		assertTrue(archive.extractZipFile(filename, destinationname));
+//	}
+//	
+//	@Test
+//	public void testExtractArchiveRar() throws IOException {
+//		Archive archive = new Archive(log);
+//		String destinationname = "C:\\Users\\Nanjou\\Documents\\GitHub\\DMChecker\\TestingFiles\\";
+//		String filename = "TestingFiles\\RawRarArchive.rar";
+//		assertFalse(archive.extractZipFile(filename, destinationname)); 
+//	}
+//	
+//	@Test
+//	public void testExtractWhatever() throws IOException {
+//		Archive archive = new Archive(log);
+//		String destinationname = "C:\\Users\\Nanjou\\Documents\\GitHub\\DMChecker\\TestingFiles\\";
+//		String filename = "TestingFiles\\dd2.pdf";
+//		assertFalse(archive.extractZipFile(filename, destinationname)); 
+//	}
+//	
+//	// How to make a test with a real corrupted zip :
+//	// 	 - Testing with incomplete files - that's the way most corrupt files are created, by interrupted downloads.
+//	//   - Another suggestion is to open the file and insert/delete random bytes.
+//	@Test
+//	public void testExtractArchiveZipCorrupted() throws IOException {
+//		Archive archive = new Archive(log);
+//		String destinationname = "C:\\Users\\Nanjou\\Documents\\GitHub\\DMChecker\\TestingFiles\\";
+//		String filename = "TestingFiles\\RawCorruptZipArchive.zip";
+//		assertFalse(archive.extractZipFile(filename, destinationname));
+//	}
+//	
+//	@Test
+//	public void testExtractArchiveOfArchives() throws IOException {
+//		Archive archive = new Archive(log);
+//		String destinationname = "C:\\Users\\Nanjou\\Documents\\GitHub\\DMChecker\\TestingFiles\\";
+//		String filename = "TestingFiles\\RawZipArchiveOfArchive.zip";
+//		assertFalse(archive.extractZipFile(filename, destinationname)); 
+//	}
 //	
 //	@Test
 //	public void testEmptyListener() throws IOException {
