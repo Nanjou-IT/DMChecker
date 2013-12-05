@@ -40,22 +40,23 @@ public class ArchiveTest {
 
 //	@Test
 //	public void testValidateArchiveZipNotOneTop() throws IOException {
-//		Archive archive = new Archive(log);
-//		String filename = "TestingFiles\\archiveOfArchive.zip";
+//		Archive archive = new Archive();
+//		String filename = "TestingFiles\\lezipdezip.zip";
 //		System.out.println("\n");
-//		assertEquals(1, archive.extractZipFile(filename));
+//		assertEquals(0, archive.extractZipFile(filename));
 //	}
 	
-	@Test
-	public void testValidateArchiveZipPlusieursAuTop() throws IOException {
-		Archive archive = new Archive(log);
-		String filename = "TestingFiles\\plusieursautop.zip";
-		System.out.println("\n");
-		assertEquals(1, archive.validateArchive(filename));
-	}
+//	@Test
+//	public void testValidateArchiveZipPlusieursAuTop() throws IOException {
+//		Archive archive = new Archive(log);
+//		String filename = "TestingFiles\\plusieursautop.zip";
+//		System.out.println("\n");
+//		assertEquals(1, archive.validateArchive(filename));
+//	}
 //	
 //	
 //	@Test
+	
 //	public void testValidateArchiveZipPlusieursDirAuTop() throws IOException {
 //		Archive archive = new Archive(log);
 //		String filename = "TestingFiles\\plusieursDirAuTop.zip";

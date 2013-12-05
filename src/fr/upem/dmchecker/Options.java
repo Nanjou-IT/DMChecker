@@ -119,7 +119,6 @@ public class Options extends JSAP {
 			}
 		}
 
-		System.out.println("BEFORE PARSE "+Arrays.toString(args));
 		// Parse all the arguments
 		JSAPResult config = jsap.parse(args);    
 
@@ -165,7 +164,6 @@ public class Options extends JSAP {
 			}
 			//MyColor.DESTINATION.setValue(option[1]);
 		}
-		System.out.println("test");
 		if(!destinationIsAlreadyKnown){
 			if((option=config.getStringArray(MyColor.DESTINATION.longFlag))!=null){
 				//System.out.println("DESTINATION ---> "+option);
@@ -195,10 +193,6 @@ public class Options extends JSAP {
 			// #TODO  erreur 
 			// Erreur, option invalide
 		}
-
-
-		System.out.println(config.getString("destination"));
-		System.out.println("Sont interdit les fichiers finissant par: "+config.getString("exist"));
 
 		/*	for (int i = 0; i < config.getInt("count"); ++i) {
 					System.out.println("Hello, World!");

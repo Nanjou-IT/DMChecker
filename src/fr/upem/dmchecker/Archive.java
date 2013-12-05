@@ -1,13 +1,19 @@
 package fr.upem.dmchecker;
 
 import java.io.File;
+
+import static java.nio.file.StandardCopyOption.*;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.file.CopyOption;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -25,33 +31,45 @@ import java.util.zip.ZipInputStream;
 import fr.upem.dmchecker.Options.MyColor;
 
 public class Archive {
-	private final Logger logger;
+//	private final Logger logger;
 	private EnumSet<MyColor> condition;
+	private final boolean verboseMode;
 	
 	private final static int NO_ERROR = 0;
 	private final static int FORCE_ERROR = 1;
 	
-	public Archive(Logger logger) {
-		this.logger = Objects.requireNonNull(logger); 
-		
-		this.condition = EnumSet.noneOf(MyColor.class);
-		MyColor m = MyColor.FORCE_ENDS_WITH;
-		m.setValue(".bmp");
-		
-		MyColor m1 = MyColor.FORCE_ONE_TOP;
-		m1.setValue("top");
-		
-		MyColor m2 = MyColor.EXIST;
-		m2.setValue("hu");
-		
-		MyColor m3 = MyColor.DESTINATION;
-		m3.setValue("ProjetsEleves");
-		
-		condition.add(m);
-		condition.add(m1);
-		condition.add(m2);
-		condition.add(m3);
+	public Archive(EnumSet<MyColor> condition) {
+		this.condition = condition;
+//		this.logger = Objects.requireNonNull(logger); 
+//		this.condition = EnumSet.noneOf(MyColor.class);
+//
+//		MyColor m = MyColor.FORCE_ENDS_WITH;
+//		m.setValue(".class");
+//		
+////		MyColor m1 = MyColor.FORCE_ONE_TOP;
+////		m1.setValue("top");
+//		
+//		MyColor m1 = MyColor.VERBOSE;
+//		m1.setValue("top");
+//		
+//		MyColor m2 = MyColor.EXIST;
+//		m2.setValue("hu");
+//		
+//		MyColor m3 = MyColor.DESTINATION;
+//		m3.setValue("ProjetsEleves");
+//		
+//		condition.add(m);
+//		condition.add(m1);
+//		condition.add(m2);
+//		condition.add(m3);
+	
+		if (condition.contains(MyColor.VERBOSE)) {
+			verboseMode = true;
+		} else {
+			verboseMode = false;
+		}
 	}
+	
 	
 	/**
 	 * A task that provide a way to handle the extraction of a particular zip archive.
@@ -94,8 +112,8 @@ public class Archive {
 	 * Note : It justs test the validity, and it doesn't extract anything. <br>
 	 * 
 	 * @param archiveName name of the zip file
-	 * @return {@code true} if the archive is accepted.<br>
-	 *         {@code false} if a problem occured, a message will describe the
+	 * @return {@code 0} if the archive is accepted.<br>
+	 *         {@code 1} if a problem occured, a message will describe the
 	 *         problem on System.err.
 	 */
 	public int validateArchive(String archiveName) {
@@ -112,12 +130,12 @@ public class Archive {
 	/**
 	 * This method permit to test one archive {@code archiveName} and to extract 
 	 * 	it in specified {@code destinationName}. <br>
-	 * Returned value is a boolean indictating the accepted status. <br>
+	 * Returned value is an int indictating the accepted status. <br>
 	 * 
 	 * @param archiveName name of the zip file
 	 * @param destinationName name of the directory destination
-	 * @return {@code true} if the archive is accepted.<br>
-	 *         {@code false} if a problem occured, a message will describe the
+	 * @return {@code 0} if the archive is accepted.<br>
+	 *         {@code 1} if a problem occured, a message will describe the
 	 *         problem on System.err.
 	 */
 	public int extractZipFile(String archiveName) {
@@ -148,13 +166,17 @@ public class Archive {
 		HashSet<String> files = new HashSet<>();
 		int errorState = NO_ERROR;
 		
-		System.out.println("\nWorking on : " + filenamePath);
+		if (verboseMode) {
+			System.out.println("\nWorking on : " + filenamePath);
+		}
 		try (ZipInputStream zipinputstream = new ZipInputStream(new FileInputStream(filenamePath.toFile()), Charset.forName("Cp437")) ) {
 			ZipEntry zipentry = zipinputstream.getNextEntry();
 			
-			int oneTopResult = oneTop(filenamePath.toString());
+			StringBuilder projectName = new StringBuilder();
+			int oneTopResult = oneTop(filenamePath.toString(), projectName);
 			if (oneTopResult == 1) {
 				System.out.println(Messages.getOutputString(MyColor.ONE_TOP.shortFlag+"", MyColor.ONE_TOP.getValue()[0]));
+				errorState = FORCE_ERROR;
 			} else if (oneTopResult == 2) {
 				System.err.println(Messages.getOutputString(MyColor.FORCE_ONE_TOP.shortFlag+"", MyColor.FORCE_ONE_TOP.getValue()[0]));
 				errorState = FORCE_ERROR;
@@ -164,8 +186,9 @@ public class Archive {
 				// For each entry to be consulted
 				String entryName = zipentry.getName();
 				files.add(entryName);
-				System.out.println("	Entry : "+entryName);
-				
+				if (verboseMode) {
+					System.out.println("	Entry : "+entryName);
+				}
 				// If returns a FORCE Error 
 				if (checkFileProperties(entryName) == FORCE_ERROR) {
 					errorState = FORCE_ERROR;
@@ -175,7 +198,7 @@ public class Archive {
 				zipentry = zipinputstream.getNextEntry();
 			}
 			
-			if (exists(files) == FORCE_ERROR) {
+			if (exists(files) > 0) {
 				errorState = FORCE_ERROR;
 			}
 			
@@ -202,7 +225,9 @@ public class Archive {
 		
 		// CREATE THE ARCHIVE PROJECTS DIR
 		String destination = Paths.get(destinationName).toAbsolutePath().toString() + File.separator;
-		System.out.println("Destination archive : " + destination + " for " + filenamePath); 
+		if (verboseMode) {
+			System.out.println("Destination archive : " + destination + " for " + filenamePath); 
+		}
 		new File(destination).mkdirs();
 		
 		try (ZipInputStream zipinputstream = new ZipInputStream(new FileInputStream(filenamePath.toFile()), Charset.forName("Cp437")) ) {
@@ -237,38 +262,48 @@ public class Archive {
 					
 					
 					// #2 : Analyze zip project + extraction
-		    		// CREATE PROJECT DIR FROM ZIPNAME
-					String projectName = entryName;
-					Pattern pattern = Pattern.compile("_.*$", Pattern.DOTALL); 
-		            Matcher matcher = pattern.matcher(projectName); 
-		            projectName = matcher.replaceFirst("").replace(" ", "_"); 
-		            String destinationProj = destination + projectName + File.separator;
-		            new File(destinationProj).mkdirs();
-		    		
+					if (verboseMode) {
+						System.out.println("\nWorking oneTop on : " + destination + entryName);
+					}
+					StringBuilder projectNameBuilder = new StringBuilder();
+		            int oneTopResult = oneTop(destination + entryName, projectNameBuilder);
+		            if (oneTopResult != NO_ERROR) {
+		            	if (oneTopResult == 1) {
+		            		System.out.println(Messages.getOutputString(MyColor.ONE_TOP.shortFlag+"", MyColor.ONE_TOP.getValue()[0]));
+		            	} else if (oneTopResult == 2) {
+		            		System.err.println(Messages.getOutputString(MyColor.FORCE_ONE_TOP.shortFlag+"", MyColor.FORCE_ONE_TOP.getValue()[0]));
+		            	}
+		            	errorState = FORCE_ERROR;
+		            	
+		            	// #3 : Delete extracted files.
+		            	File oldZip = new File(destination	+ entryName);
+		            	oldZip.delete();
+		            	
+		            	zipinputstream.closeEntry();
+		            	zipentry = zipinputstream.getNextEntry();
+			    		continue;
+		            }
+		            String projectName = projectNameBuilder.toString();
+		            
 		            HashSet<String> files = new HashSet<>();
 		            
-		    		try (ZipInputStream zipinputstreamProj = new ZipInputStream(new FileInputStream(destination	+ entryName), Charset.forName("Cp437")) ) {
+		            try (ZipInputStream zipinputstreamProj = new ZipInputStream(new FileInputStream(destination	+ entryName), Charset.forName("Cp437")) ) {
 		    			ZipEntry zipentryProj = zipinputstreamProj.getNextEntry();
-		    			
-		    			System.out.println("\nWorking on : " + entryName);
-		    			int oneTopResult = oneTop(destination + entryName);
-		    			if (oneTopResult == 1) {
-		    				System.out.println(Messages.getOutputString(MyColor.ONE_TOP.shortFlag+"", MyColor.ONE_TOP.getValue()[0]));
-		    			} else if (oneTopResult == 2) {
-		    				System.err.println(Messages.getOutputString(MyColor.FORCE_ONE_TOP.shortFlag+"", MyColor.FORCE_ONE_TOP.getValue()[0]));
-		    				errorState = FORCE_ERROR;
-		    			}
-		    			
 		                
 		    			byte[] buf1 = new byte[1024];
 		    			while (zipentryProj != null) {
 		    				String entryNameProj = zipentryProj.getName();
 		    				File newFileProj = new File(entryNameProj);
 		    				files.add(entryNameProj);
-		    				System.out.println("	Entry : " + entryNameProj);
-		    				
+		    				if (verboseMode) {
+		    					System.out.println("	Entry : " + entryNameProj);
+		    				}
 		    				if (checkFileProperties(entryNameProj) == FORCE_ERROR) {
 		    					errorState = FORCE_ERROR;
+		    					
+		    					zipinputstreamProj.closeEntry();
+			    				zipentryProj = zipinputstreamProj.getNextEntry();
+			    				continue;
 		    				}
 
 		    				// Creating the parent directories
@@ -278,14 +313,14 @@ public class Archive {
 		    						break;
 		    					}
 		    				} else {
-		    					new File(destinationProj + directoryProj).mkdirs();
+		    					new File(destination + directoryProj).mkdirs();
 		    				}
 		    				
 		    				// Creating zip files into dir
 		    				int n1;
 		    				FileOutputStream fileoutputstreamProj;
 		    				if (!zipentryProj.isDirectory()) {
-		    					fileoutputstreamProj = new FileOutputStream(destinationProj	+ entryNameProj);
+		    					fileoutputstreamProj = new FileOutputStream(destination	+ entryNameProj);
 		    					while ((n1 = zipinputstreamProj.read(buf1, 0, 1024)) > -1) {
 		    						fileoutputstreamProj.write(buf1, 0, n1);
 		    					}
@@ -296,15 +331,32 @@ public class Archive {
 		    				zipentryProj = zipinputstreamProj.getNextEntry();
 		    			}
 		    			
-		    			if (exists(files) == FORCE_ERROR) {
+			    		// RENAME PROJECT DIR FROM ZIPNAME
+						String efficientProjectName = entryName;
+						Pattern patternSpaces = Pattern.compile("^\\s+", Pattern.DOTALL); 
+			            Matcher matcherSpaces = patternSpaces.matcher(efficientProjectName); 
+			            efficientProjectName = matcherSpaces.replaceFirst("");
+						Pattern pattern = Pattern.compile("_.*$", Pattern.DOTALL); 
+			            Matcher matcher = pattern.matcher(efficientProjectName); 
+			            efficientProjectName = matcher.replaceFirst("").replace(" ", "_");
+			            
+			            Path dirSource = Paths.get(destination + projectName);
+			            Path dirTarget = Paths.get(destination + efficientProjectName);
+			            FileUtils.deleteRecursiveIfExists(dirTarget);
+			            // Move doesn't work enough as expected.
+			            // Files.move(dirSource, dirTarget, REPLACE_EXISTING);
+			            // Copy doesn't work enough as expected.
+			            // Files.copy(dirSource, dirTarget, COPY_ATTRIBUTES );
+			            FileUtils.copyFolder(dirSource, dirTarget);
+			            FileUtils.deleteRecursiveIfExists(dirSource);
+			            
+		    			if (exists(files) > NO_ERROR) {
 		    				errorState = FORCE_ERROR;
 		    			}
-		    			
 		    		}
-		    		
-		    		// #3 : Delete extracted files.
-		    		File oldZip = new File(destination	+ entryName);
-		    		oldZip.delete();
+		            // #3 : Delete extracted files.
+	            	File oldZip = new File(destination	+ entryName);
+	            	oldZip.delete();
 				}
 				
 				zipinputstream.closeEntry();
@@ -335,8 +387,8 @@ public class Archive {
 	 * 		   1 if a FORCE option occured.
 	 */
 	private int checkFileProperties(String entryName) {
-		if (endsWith(entryName) == FORCE_ERROR || beginWith(entryName) == FORCE_ERROR 
-				|| forbids(entryName) == FORCE_ERROR || forbids(entryName) == FORCE_ERROR) {
+		if (endsWith(entryName) > NO_ERROR || beginWith(entryName) > NO_ERROR 
+				|| forbids(entryName) > NO_ERROR || forbids(entryName) > NO_ERROR) {
 			return FORCE_ERROR;
 		}
 		
@@ -345,11 +397,11 @@ public class Archive {
 	
 	/**
 	 * Work out if there is a unique directory at the top of archive. 
-	 * 
-	 * @return 0 if one directory at top, 1 if not.
+	 * 		Note: that there are multi levels of errors 3 by default, 2 on FORCE, 1 on normal level.
+	 * @return 1/2/3 if one directory at top, 0 if not (NO_ERROR).
 	 */
-	private int oneTop(String zipFile) throws IOException {
-		int errorLevel = NO_ERROR;
+	private int oneTop(String zipFile, StringBuilder projectName) throws IOException {
+		int errorLevel = 3; // No options but search for oneTop
 		
 		String oneTop = null;
 		if (condition.contains(MyColor.FORCE_ONE_TOP)) {
@@ -398,7 +450,7 @@ public class Archive {
 		    if (oneTop != null && !oneTopDirectory.equals(oneTop)) {
     			return errorLevel;
     		}
-			    
+		    projectName.append(oneTopDirectory);
 		}
 		
 		return NO_ERROR;
@@ -427,6 +479,7 @@ public class Archive {
 			for (String str : endsWithValues) {
 				if (entryName.endsWith(str)) {
 					System.out.println(Messages.getOutputString(MyColor.ENDS_WITH.shortFlag+"", str));
+					errorState = 2;
 				}
 			}
 		}
@@ -457,6 +510,7 @@ public class Archive {
 			for (String str : beginWithValues) {
 				if (entryName.startsWith(str)) {
 					System.out.println(Messages.getOutputString(MyColor.BEGIN_WITH.shortFlag+"", str));
+					errorState = 2;
 				}
 			}
 		}
@@ -487,6 +541,7 @@ public class Archive {
 			for (String str : forbidsValues) {
 				if (entryName.equals(str)) {
 					System.out.println(Messages.getOutputString(MyColor.FORBIDS.shortFlag+"", str));
+					errorState = 2;
 				}
 			}
 		}
@@ -498,8 +553,8 @@ public class Archive {
 	 * Test if the needed string is in the given zip project.
 	 * 
 	 * @return 0 if the file was found <br>
-	 * 		   1 if the file was not found on NORMAL level. <br>
-	 * 		   2 if the file was not found on FORCE level.
+	 * 		   1 if the file was not found on FORCE level. <br>
+	 * 		   2 if the file was not found on NORMAL level.
 	 */
 	private int exists(Set<String> files) {
 		int errorState = NO_ERROR;
@@ -517,10 +572,44 @@ public class Archive {
 			for (String str : exist) {
 				if (!files.contains(str)) {
 					System.out.println(Messages.getOutputString(MyColor.EXIST.shortFlag+"", str));
+					errorState = 2;
 				}
 			}
 		}
-	
+		
 		return errorState;
 	}
+
+	/**
+	 * Start function, note that this function also terminate the program exectution 
+	 * 	and exit with the needed status.<br>
+	 * 	<pre>
+	 * 	- {@code exit(1)} : if an error occured (Force or even Normal).
+	 * 	- {@code exit(0)} : if no errors where detected.
+	 */
+	public void start() {
+		if (condition.contains(MyColor.OPTION_ONE)) {
+			String[] garbageOptions = MyColor.OPTION_ONE.getValue();
+			
+			int status = validateArchive(garbageOptions[0]);
+			System.exit(status);
+		} else if (condition.contains(MyColor.OPTION_TWO)) {
+			String[] garbageOptions = MyColor.OPTION_TWO.getValue();
+			
+			int status = extractZipFile(garbageOptions[0]);
+			System.exit(status);
+		} else {
+			System.out.println("Option not recognized.");
+			System.exit(1);
+		}
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }
