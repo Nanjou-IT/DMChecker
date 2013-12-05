@@ -48,6 +48,7 @@ public class Test {
 		//main.test(null);
 		main.launchOfTests("C:/temporaire2/","./resultat","C:/temporaire/hash/");
 	}
+	
 
 	public void launchOfTests(String mainDirectory, String resultFile, String testDirectory){
 
@@ -187,4 +188,5 @@ public class Test {
 			}
 		}
 	}
+	
 }
